@@ -21,6 +21,7 @@ class DefaultController extends Controller
     {
         $repository = $this->getDoctrine()
             ->getRepository("AppBundle:Theme");
+
         $postRepository = $this->getDoctrine()
             ->getRepository("AppBundle:Post");
 
@@ -31,6 +32,7 @@ class DefaultController extends Controller
         $user = $this->getUser();
         $roles = isset($user)?$user->getRoles():[];
         $formView = null;
+
         if(in_array("ROLE_AUTHOR", $roles)) {
             //Création du formulaire
             $post = new Post();
@@ -102,10 +104,7 @@ class DefaultController extends Controller
 
         $author = new Author();
 
-        $form = $this->createForm(
-            AuthorType::class,
-            $author
-        );
+        $form = $this->createForm(AuthorType::class, $author );
 
         $form->handleRequest($request);
 

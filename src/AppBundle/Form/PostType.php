@@ -23,10 +23,7 @@ class PostType extends AbstractType
     {
         $builder
             ->add('title', TextType::class, ["label"=>"Titre"])
-            ->add('text', CKEditorType::class, [
-                "label" => "Texte",
-                "attr" => ["rows" => 12]
-            ])
+            ->add('text', CKEditorType::class, ["label" => "Texte","attr" => ["rows" => 12] ])
 
             ->add('theme', EntityType::class, [
                 "class" => "AppBundle\Entity\Theme",

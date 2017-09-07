@@ -3,6 +3,8 @@
 namespace AppBundle\Controller;
 
 
+use AppBundle\Entity\Answer;
+use AppBundle\Form\AnswerType;
 use AppBundle\Form\PostType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -67,7 +69,48 @@ class PostController extends Controller
         //Sécurisation de l'opération
         $user = $this->getUser();
         $roles = isset($user)?$user->getRoles():[];
-        $userId = isset($user)?$user->getId(): null;
+       // $userId = isset($user)?$user->getId(): null;
+
+
+
+
+        //
+        if(in_array("ROLE_AUTHOR", $roles)) {
+
+            $repository = $this->getDoctrine()
+                ->getRepository("AppBundle:Answer");
+            $newText= $repository->findAll();
+
+            //Création du formulaire
+            $answer = new Answer();
+            $answer->setCreatedAt(new \DateTime())
+                ->setAuthor("$user")
+               ->setPost($post);
+
+            $formText = $this->createForm(AnswerType::class, $answer);
+            //Hydratation de l'entité post
+            $formText->handleRequest($request);
+
+            //Traitement du formulaire
+            if ($formText->isSubmitted() and $formText->isValid()) {
+
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($answer);
+                $em->flush();
+
+                //Redirection
+                return $this->redirectToRoute(
+                    "theme_details",
+                    ["id" => $post->getTheme()->getId()]);
+            }
+
+
+        }
+
+
+
+/*
+
         if(!in_array("ROLE_AUTHOR", $roles) || $userId != $post->getAuthor()->getId() ){
             throw new AccessDeniedHttpException("Vous n'avez pas les droits pour modifier ce post");
         }
@@ -88,8 +131,8 @@ class PostController extends Controller
                 ["id" => $post->getTheme()->getId()]
             );
         }
-
-        return $this->render("post/edit.html.twig", ["postForm"=>$form->createView()]);
+*/
+        return $this->render("post/edit.html.twig", ["postForm"=>$formText->createView()]);
     }
 
 }
