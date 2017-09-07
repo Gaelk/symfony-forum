@@ -71,9 +71,6 @@ class PostController extends Controller
         $roles = isset($user)?$user->getRoles():[];
        // $userId = isset($user)?$user->getId(): null;
 
-
-
-
         //
         if(in_array("ROLE_AUTHOR", $roles)) {
 
@@ -84,7 +81,7 @@ class PostController extends Controller
             //Création du formulaire
             $answer = new Answer();
             $answer->setCreatedAt(new \DateTime())
-                ->setAuthor("$user")
+                ->setAuthor($user->getEmail())
                ->setPost($post);
 
             $formText = $this->createForm(AnswerType::class, $answer);
