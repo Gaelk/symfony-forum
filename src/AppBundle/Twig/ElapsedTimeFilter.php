@@ -46,7 +46,7 @@ class ElapsedTimeFilter extends \Twig_Extension
           $value=$interval->$key;
 
           if ($value>0){
-              $format.="%$key $val";
+              $format.=" %$key $val";
           }
         }
         return $interval->format($format);
