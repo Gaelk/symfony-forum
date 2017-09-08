@@ -12,6 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Produit
 {
+
+    // CRUD
     /**
      * @var int
      *
