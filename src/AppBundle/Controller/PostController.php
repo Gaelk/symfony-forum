@@ -69,44 +69,7 @@ class PostController extends Controller
         //Sécurisation de l'opération
         $user = $this->getUser();
         $roles = isset($user)?$user->getRoles():[];
-       // $userId = isset($user)?$user->getId(): null;
-
-        //
-        if(in_array("ROLE_AUTHOR", $roles)) {
-
-            $repository = $this->getDoctrine()
-                ->getRepository("AppBundle:Answer");
-            $newText= $repository->findAll();
-
-            //Création du formulaire
-            $answer = new Answer();
-            $answer->setCreatedAt(new \DateTime())
-                ->setAuthor($user->getEmail())
-               ->setPost($post);
-
-            $formText = $this->createForm(AnswerType::class, $answer);
-            //Hydratation de l'entité post
-            $formText->handleRequest($request);
-
-            //Traitement du formulaire
-            if ($formText->isSubmitted() and $formText->isValid()) {
-
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($answer);
-                $em->flush();
-
-                //Redirection
-                return $this->redirectToRoute(
-                    "theme_details",
-                    ["id" => $post->getTheme()->getId()]);
-            }
-
-
-        }
-
-
-
-/*
+        $userId = isset($user)?$user->getId(): null;
 
         if(!in_array("ROLE_AUTHOR", $roles) || $userId != $post->getAuthor()->getId() ){
             throw new AccessDeniedHttpException("Vous n'avez pas les droits pour modifier ce post");
@@ -128,7 +91,60 @@ class PostController extends Controller
                 ["id" => $post->getTheme()->getId()]
             );
         }
-*/
+
+        return $this->render("post/edit.html.twig", ["postForm"=>$form->createView()]);
+    }
+
+
+    /**
+     * @Route("/answer/{id}", name="post_edit")
+     * @param Request $request
+     * @param Post $post
+     * @return Response
+     */
+    public function answerAction(Request $request, Post $post){
+
+        //Sécurisation de l'opération
+        $user = $this->getUser();
+        $roles = isset($user)?$user->getRoles():[];
+
+        if(!in_array("ROLE_AUTHOR", $roles)  ){
+            throw new AccessDeniedHttpException("Vous n'avez pas les droits de rediger un commentaire ");
+        }
+
+        //
+        if(in_array("ROLE_AUTHOR", $roles)) {
+
+            $repository = $this->getDoctrine()
+                ->getRepository("AppBundle:Answer");
+            $newText= $repository->findAll();
+
+            //Création du formulaire
+            $answer = new Answer();
+            $answer->setCreatedAt(new \DateTime())
+                ->setAuthor($user->getEmail())
+                ->setPost($post);
+
+            $formText = $this->createForm(AnswerType::class, $answer);
+            //Hydratation de l'entité post
+            $formText->handleRequest($request);
+
+            //Traitement du formulaire
+            if ($formText->isSubmitted() and $formText->isValid()) {
+
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($answer);
+                $em->flush();
+
+                //Redirection
+                return $this->redirectToRoute(
+                    "theme_details",
+                    ["id" => $post->getTheme()->getId()]);
+            }
+
+
+        }
+
         return $this->render("post/edit.html.twig", ["postForm"=>$formText->createView()]);
     }
 

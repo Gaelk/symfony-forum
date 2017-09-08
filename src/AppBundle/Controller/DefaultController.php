@@ -1,7 +1,7 @@
 <?php
 
 namespace AppBundle\Controller;
-
+use AppBundle\Service;
 use AppBundle\Entity\Author;
 use AppBundle\Entity\Post;
 use AppBundle\Form\AuthorType;
@@ -38,26 +38,19 @@ class DefaultController extends Controller
             $post = new Post();
             $post->setCreatedAt(new \DateTime());
             $post->setAuthor($user);
-            $form = $this->createForm(PostType::class, $post);
 
-            //Hydratation de l'entité post
-            $form->handleRequest($request);
+            //Service PostFormHandler
+            $form=$this->get("post.form_handler")->setPost($post);
 
-            //Traitement du formulaire
-            if ($form->isSubmitted() and $form->isValid()) {
-
-                $uploadManager = $this->get("stof_doctrine_extensions.uploadable.manager");
-                $uploadManager->markEntityToUpload($post, $post->getImageFileName());
-
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($post);
-                $em->flush();
-
+            /**
+             * process return true si la creation du formulaire a réussie
+             */
+            if ($form->process()) {
                 //Redirection
                 return $this->redirectToRoute("homepage");
             }
 
-            $formView = $form->createView();
+            $formView = $form->getFormView();
         }
         //Fin de la gestion des nouveaux posts
 
@@ -144,5 +137,21 @@ class DefaultController extends Controller
                 "error" => $securityUtils->getLastAuthenticationError()
             ]
         );
+    }
+
+    /**
+     * @return Response
+     * @Route("/test-service")
+     */
+    public function testServiceAction(){
+
+
+       $helloService=$this->get("service.hello");
+        $helloService->setName("BOB");
+        $newServ=$this->get("service.hello");
+        $message=$helloService->sayHello()." ".$newServ->sayHello();
+
+        return $this->render("default/test-service.html.twig", ["message"=>$message]);
+
     }
 }

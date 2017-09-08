@@ -7,3 +7,47 @@ services:
     #service_name:
     #    class: AppBundle\Directory\ClassName
     #    arguments: ['@another_service_name', 'plain_value', '%parameter_name%']
+    app.service.hello_renderer:
+      class: AppBundle\Service\HelloRenderer
+
+    service.hello:
+      class: AppBundle\Service\HelloService
+      arguments:
+       - "World"
+       - "@app.service.hello_renderer"
+      shared: false   # pour utiliser les arguments par defaut lorsqu'on appelle le service sans le set
+
+    post.manager:
+      class: AppBundle\Entity\Manager\PostManager
+      arguments:
+        - "@doctrine.orm.entity_manager"
+
+    post.entity:
+      class: AppBundle\Entity\Post
+
+    post.form_handler:
+      class: AppBundle\Form\Handler\PostFormHandler
+      arguments:
+        - "@post.entity"
+        - "AppBundle\\Form\\PostType"
+        - "@form.factory"
+        - "@post.manager"
+        - "@request_stack"
+        - "@stof_doctrine_extensions.uploadable.manager"
+
+    post.file_datatransformer:
+      class: AppBundle\Form\Transformer\UploadedFileDataTransformer
+      arguments:
+        - "%stof_doctrine_extensions.default_file_path%"
+
+    post.form_type:
+      class: AppBundle\Form\PostType
+      arguments:
+        - "@post.file_datatransformer"
+      tags:
+        - {name: form.type}
+
+    twig.filter.elapsed:
+      class: AppBundle\Twig\ElapsedTimeFilter
+      tags:
+        - {name: "twig.extension"}
